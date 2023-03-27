@@ -7,7 +7,9 @@ param multiplier :=
     one 1.0
     two 1.2;
 
-param replacable := one 1 two 0;
+param replacable_by : one two := 
+                  one 1   1 
+                  two 0   1;
 
 param distance:  opole brzeg nysa prudnik strzelce kozle raciborz := 
        opole     0.0   47.1  57.5 51.1    33.9     52.5  78.9
