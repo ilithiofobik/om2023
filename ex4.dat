@@ -1,0 +1,28 @@
+data;
+
+set Courses := algebra analiza fizyka chemia_min chemia_org;
+set Groups := i ii iii iv;
+
+param StartingTime : algebra analiza fizyka chemia_min chemia_org := 
+                i    13      13      8      8          9
+                ii   10      10      10     8          10.5
+                iii  10      11      15     13         11
+                iv   11      8       17     13         13;
+
+param EndingTime :   algebra analiza fizyka chemia_min chemia_org := 
+                i    15      15      11     10         10.5
+                ii   12      12      13     10         12
+                iii  12      13      18     15         12.5
+                iv   13      10      20     15         14.5;
+
+param Day :          algebra analiza fizyka chemia_min chemia_org := 
+                i    1       1       2      1          1
+                ii   2       2       2      1          1
+                iii  3       3       4      4          5
+                iv   3       4       4      5          5;
+
+param Preference :   algebra analiza fizyka chemia_min chemia_org := 
+                i    5       4       3      10         0
+                ii   4       4       5      10         5
+                iii  10      5       7      7          3
+                iv   5       6       8      5          4;
