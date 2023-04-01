@@ -1,3 +1,5 @@
+# Wojciech Sęk
+
 param n >= 1;
 
 param A{i in {1..n}, j in {1..n}} := 1/(i + j - 1);

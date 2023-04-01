@@ -1,3 +1,5 @@
+# Wojciech Sęk
+
 set Courses;
 set Groups;
 
@@ -13,7 +15,6 @@ maximize total_preference: sum {g in Groups, c in Courses} Preference[g,c] * x[g
 s.t. no_lessons_on_wednesday   {g in Groups, c in Courses : Day[g,c] = 3} : x[g,c] = 0;
 s.t. no_lessons_on_friday      {g in Groups, c in Courses : Day[g,c] = 5} : x[g,c] = 0;
 s.t. no_preference_less_that_5 {g in Groups, c in Courses : Preference[g,c] <= 4 } : x[g,c] = 0;
-#s.t. no_preference_less_that_5 {g in Groups, c in Courses } : Preference[g,c] * (1 - x[g,c]) <= 1110;
 
 s.t. max_day_length {d in 1..5} : 
     sum {g in Groups, c in Courses : Day[g,c] = d} (EndingTime[g,c] - StartingTime[g,c]) * x[g,c] <= 4;
@@ -44,6 +45,8 @@ s.t. sport_break {g1 in Groups, g2 in Groups, g3 in Groups, c1 in Courses, c2 in
 
 solve;
 
-display x;
+printf "Total preference: %d\n", total_preference;
+printf{g in Groups, c in Courses : x[g,c] > 0}: 
+    "Take course %s with group %s\n", c, g;
 
 end;

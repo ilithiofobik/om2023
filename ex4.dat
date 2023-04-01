@@ -1,3 +1,5 @@
+# Wojciech Sęk
+
 data;
 
 set Courses := algebra analiza fizyka chemia_min chemia_org;
@@ -26,3 +28,4 @@ param Preference :   algebra analiza fizyka chemia_min chemia_org :=
                 ii   4       4       5      10         5
                 iii  10      5       7      7          3
                 iv   5       6       8      5          4;
+                
