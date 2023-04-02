@@ -4,6 +4,7 @@ data;
 
 set Courses := algebra analiza fizyka chemia_min chemia_org;
 set Groups := i ii iii iv;
+set PEGroups := i ii iii;
 
 param StartingTime : algebra analiza fizyka chemia_min chemia_org := 
                 i    13      13      8      8          9
@@ -29,3 +30,17 @@ param Preference :   algebra analiza fizyka chemia_min chemia_org :=
                 iii  10      5       7      7          3
                 iv   5       6       8      5          4;
                 
+param PEStartingTime :=
+    i   13
+    ii  11
+    iii 13;
+     
+param PEEndingTime :=
+    i   15
+    ii  13
+    iii 15;
+
+param PEDay :=
+    i   1
+    ii  3
+    iii 3;
