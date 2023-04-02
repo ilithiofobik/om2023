@@ -1,0 +1,40 @@
+# Wojciech Sęk
+
+data;
+
+set Crude             := b1 b2;
+set CrudeProds        := petrol oil destylat resztki;
+set Prods     := petrol oil resztki;
+set OilUsage    := domowe ciezkie;
+set DestylatCel       := ciezkie crack;
+
+param crude_cost := 
+    b1 1300
+    b2 1500;
+
+param efficiency : b1    b2 := 
+        petrol     0.15  0.10
+        oil       0.40  0.35
+        destylat   0.15  0.20  
+        resztki    0.15  0.25;
+
+param crack_efficiency := 
+        petrol     0.50
+        oil       0.20
+        resztki    0.06;
+                
+
+param destillation_cost := 10;
+param cracking_cost     := 20;
+
+param min_pal_sil       := 200000;
+param min_dom_pal_oil  := 400000;
+param min_ciez_pal_oil := 250000;
+
+param sulfur_limit := 0.005;
+param destill_oil_sulfur :=
+    b1 0.002
+    b2 0.012;
+param crack_oil_sulfur :=
+    b1 0.003
+    b2 0.025;

@@ -1,80 +1,47 @@
 # Wojciech Sęk
 
-var b1 >= 0;
-var b2 >= 0;
+set Crude;
+set CrudeProds;
+set OilUsage;
+set Prods;
+set DestylatCel;
 
-var b1_benzyna >= 0;
-var b2_benzyna >= 0;
+param crude_cost {Crude}               >= 0;
+param efficiency {CrudeProds, Crude}   >= 0;
+param crack_efficiency {Prods} >= 0;
+param destillation_cost >= 0;
+param cracking_cost     >= 0;
 
-var b1_olej >= 0;
-var b2_olej >= 0;
+param min_pal_sil       >= 0;
+param min_dom_pal_oil  >= 0;
+param min_ciez_pal_oil >= 0;
 
-var b1_destylat >= 0;
-var b2_destylat >= 0;
+param sulfur_limit >= 0;
+param destill_oil_sulfur{Crude} >= 0;
+param crack_oil_sulfur{Crude}   >= 0;
 
-var b1_resztki >= 0;
-var b2_resztki >= 0;
+var amount {Crude}                  >= 0;
+var oil {OilUsage, Crude}     >= 0;
+var distillate {DestylatCel, Crude} >= 0;
 
-var b1_olej_dom >= 0;
-var b2_olej_dom >= 0;
+minimize total_cost: sum {r in Crude} ((crude_cost[r] + destillation_cost) * amount[r] + cracking_cost * distillate["crack", r]);
 
-var b1_olej_ciez >= 0;
-var b2_olej_ciez >= 0;
+s.t. oil_suma_warunek{r in Crude}     : efficiency["oil", r]     * amount[r] = sum {o in OilUsage} oil[o, r];
+s.t. destylat_suma_warunek{r in Crude} : efficiency["destylat", r] * amount[r] = sum {d in DestylatCel} distillate[d, r];
 
-var b1_destylat_krak >= 0;
-var b2_destylat_krak >= 0;
+s.t. pal_sil_suma:       min_pal_sil       <= sum {r in Crude} (crack_efficiency["petrol"] *  distillate["crack", r] + efficiency["petrol", r] * amount[r]);
+s.t. dom_pal_oil_suma:  min_dom_pal_oil  <= sum {r in Crude} (crack_efficiency["oil"] * distillate["crack", r] + oil["domowe", r]);
+s.t. ciez_pal_oil_suma: min_ciez_pal_oil <= sum {r in Crude} (oil["ciezkie", r] + distillate["ciezkie", r] + efficiency["resztki", r] * amount[r] + crack_efficiency["resztki"] * distillate["crack", r]);
 
-var b1_destylat_ciez >= 0;
-var b2_destylat_ciez >= 0;
-
-var krak >= 0;
-
-var krak_benzyna >= 0;
-var krak_olej    >= 0;
-var krak_resztki >= 0;
-
-var krak_b1_olej >= 0;
-var krak_b2_olej >= 0;
-
-var pal_sil >= 200000;
-var dom_pal_olej >= 400000;
-var ciez_pal_olej >= 250000;
-
-minimize total_cost: 1300 * b1 + 1500 * b2 + 10 * (b1 + b2) + 20 * (b1_destylat_krak + b2_destylat_krak);
-
-s.t. b1_benzyna_warunek  : b1_benzyna  = 0.15 * b1;
-s.t. b1_olej_warunek     : b1_olej     = 0.40 * b1;
-s.t. b1_destylat_warunek : b1_destylat = 0.15 * b1;
-s.t. b1_resztki_warunek  : b1_resztki  = 0.15 * b1;
-s.t. b2_benzyna_warunek  : b2_benzyna  = 0.10 * b2;
-s.t. b2_olej_warunek     : b2_olej     = 0.35 * b2;
-s.t. b2_destylat_warunek : b2_destylat = 0.20 * b2;
-s.t. b2_resztki_warunek  : b2_resztki  = 0.25 * b2;
-
-s.t. b1_olej_suma_warunek : b1_olej_ciez + b1_olej_dom = b1_olej;
-s.t. b2_olej_suma_warunek : b2_olej_ciez + b2_olej_dom = b2_olej;
-
-s.t. b1_destylat_suma_warunek : b1_destylat_ciez + b1_destylat_krak = b1_destylat;
-s.t. b2_destylat_suma_warunek : b2_destylat_ciez + b2_destylat_krak = b2_destylat;
-
-s.t. krak_warunek : b1_destylat_krak + b2_destylat_krak = krak;
-s.t. krak_benzyna_warunek : krak_benzyna = 0.50 * krak;
-s.t. krak_olej_warunek    : krak_olej    = 0.20 * krak;
-s.t. krak_resztki_warunek : krak_resztki = 0.06 * krak;
-
-s.t. krak_b1_olej_warunek : krak_b1_olej = 0.20 * b1_destylat_krak;
-s.t. krak_b2_olej_warunek : krak_b2_olej = 0.20 * b2_destylat_krak;
-
-s.t. pal_sil_suma:       b1_benzyna + b2_benzyna + krak_benzyna = pal_sil;
-s.t. dom_pal_olej_suma:  b1_olej_dom + b2_olej_dom + krak_olej = dom_pal_olej;
-s.t. ciez_pal_olej_suma: b1_olej_ciez + b2_olej_ciez + b1_resztki + b2_resztki + krak_resztki + b1_destylat_ciez + b2_destylat_ciez = ciez_pal_olej;
-
-# siarka
-s.t. siarka_warunek : dom_pal_olej * 0.005 >= (0.002 * b1_olej_dom) + (0.012 * b2_olej_dom) + (0.003 * krak_b1_olej) + (0.025 * krak_b2_olej);    
+s.t. sulfur_cond : 
+    sulfur_limit * sum {r in Crude} (crack_efficiency["oil"] * distillate["crack", r] + oil["domowe", r]) >= 
+    sum {r in Crude} (destill_oil_sulfur[r] * oil["domowe", r] + (destill_oil_sulfur[r] * crack_efficiency["oil"] * distillate["crack", r]));    
 
 solve;
 
-printf "b1 = %f ton\n", b1;
-printf "b2 = %f ton\n", b2;
+display amount;
+display oil;
+display distillate;
+display total_cost;
 
 end;
