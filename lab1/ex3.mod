@@ -37,7 +37,7 @@ s.t. heavy_pal_oil_suma: min_heavy_oil <= sum {c in Crude} (oil["heavy", c] + di
 
 s.t. sulphur_cond : 
     sulphur_limit * sum {c in Crude} (crack_efficiency["oil"] * distillate["crack", c] + oil["civil", c]) >= 
-    sum {c in Crude} (distillate_oil_sulphur[c] * oil["civil", c] + (distillate_oil_sulphur[c] * crack_efficiency["oil"] * distillate["crack", c]));    
+    sum {c in Crude} (distillate_oil_sulphur[c] * oil["civil", c] + (crack_oil_sulphur[c] * crack_efficiency["oil"] * distillate["crack", c]));    
 
 solve;
 

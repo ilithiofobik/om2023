@@ -19,9 +19,10 @@ var y {PEGroups} binary;
 
 maximize total_preference: sum {g in Groups, c in Courses} Preference[g,c] * x[g,c];
 
-s.t. no_lessons_on_wednesday   {g in Groups, c in Courses : Day[g,c] = 3} : x[g,c] = 0;
-s.t. no_lessons_on_friday      {g in Groups, c in Courses : Day[g,c] = 5} : x[g,c] = 0;
-s.t. no_preference_less_that_5 {g in Groups, c in Courses : Preference[g,c] <= 4 } : x[g,c] = 0;
+# comment if unnecessary
+# s.t. no_lessons_on_wednesday   {g in Groups, c in Courses : Day[g,c] = 3} : x[g,c] = 0;
+# s.t. no_lessons_on_friday      {g in Groups, c in Courses : Day[g,c] = 5} : x[g,c] = 0;
+# s.t. no_preference_less_that_5 {g in Groups, c in Courses : Preference[g,c] <= 4 } : x[g,c] = 0;
 
 s.t. max_day_length {d in 1..5} : 
     sum {g in Groups, c in Courses : Day[g,c] = d} (EndingTime[g,c] - StartingTime[g,c]) * x[g,c] <= 4;
@@ -39,7 +40,13 @@ s.t. no_overlap {g1 in Groups, g2 in Groups, c1 in Courses, c2 in Courses :
 s.t. no_PE_overlap {g1 in Groups, c1 in Courses, p in PEGroups : 
     Day[g1,c1] = PEDay[p] and 
     StartingTime[g1, c1] <= PEStartingTime[p]  and 
-    PEStartingTime[p] <= EndingTime[g1, c1] } : 
+    PEStartingTime[p]    <= EndingTime[g1, c1] } : 
+        x[g1,c1] + y[p] <= 1;
+
+s.t. no_PE_rev_overlap {g1 in Groups, c1 in Courses, p in PEGroups : 
+    Day[g1,c1] = PEDay[p] and 
+    PEStartingTime[p]   <= StartingTime[g1,c1]  and 
+    StartingTime[g1,c1] <= PEEndingTime[p] } : 
         x[g1,c1] + y[p] <= 1;
 
 s.t. lunch_break {d in 1..5} : 
