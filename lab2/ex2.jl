@@ -24,7 +24,7 @@ model = Model(Cbc.Optimizer)
 # each task is executed after its release date
 @constraint(model, [j in 1:n], sum((t-1) * x[j,t] for t in 1:T - p[j] + 1) >= r[j])
 # tasks do not overlap
-@constraint(model, [t in 1:T], sum(x[j,s] for j in 1:n, s in t:min(T, t-1+p[j])) <= 1)
+@constraint(model, [t in 1:T], sum(x[j,s] for j in 1:n, s in max(1, t+1-p[j]):t) <= 1)
 
 # minimize weighted sum of completion times
 @objective(model, Min, sum(w[j] * (t-1+p[j]) * x[j,t] for  j in 1:n, t in 1:T)) 
