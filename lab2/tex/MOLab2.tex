@@ -1,0 +1,288 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[polish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{polski}
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+%\usepackage{tikz-cd}
+
+\title{Metody Optymalizacji - Laboratorium 2}
+\author{Wojciech Sęk}
+
+\def\XX{\mathcal{X}}
+\def\N{\mathbb{N}}
+\def\x{\textbf{x}}
+\def\z{\textbf{z}}
+\def\0{\textbf{0}}
+\def\1{\textbf{1}}
+\def\c{\textbf{c}}
+\def\b{\textbf{b}}
+
+\begin{document}
+\maketitle
+\section{Zadanie 1}
+\subsection{Model}
+
+\subsubsection{Zmienne decyzyjne}
+Dla $m$ danych sposobów pocięcia standardowej deski na deski żądanych szerokości przez $x_j$ dla $j\in[m]$ oznaczamy liczbę desek pociętych w $j$-ty sposób.
+
+\subsubsection{Ograniczenia}
+\begin{itemize}
+\item Niech $\alpha_{j,i}$ oznacza liczbę desek rodzaju $i$ wyciętych, gdy używamy $j$-tej metody cięcia deski. Niech $\delta_i$ oznacza podaż na deski rodzaju $i$. Suma wyprodukowanych desek danego rodzaju musi być równa podaży na dany rodzaj:
+$$(\forall i \in [n])\left(\sum_{j=1}^m x_j \cdot \alpha_{j,i} = \delta_i\right)$$
+\end{itemize}
+
+\subsection{Funkcja celu}
+Minimalizujemy sumę odpadów z produkcji wszystkich desek. Niech $\lambda_i$ oznacza szerokość odpadu w $i$-tej metodzie. Funkcją celu jest wtedy
+$$f(\x)=\sum_{i=1}^m x_i \cdot \lambda_{i}$$
+\subsection{Wyniki}
+Dla standardowej deski szerokości 22 i żądania na 80 desek szerokości 3, 120 desek szerokości 5 i 110 desek szerokości 7 optymalnie będzie rozciąć deski wg następującej tabeli, gdzie $i$ oznacza numer metody (łącznie metod było 42, pomijamy wiersze dla $x_i=0$). Niech $\alpha_i(j)$ oznacza liczbę desek szerokości $i$ uzyskanych w danej metodzie:
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline 
+$i$ & $x_i$ & $x_i\cdot \alpha_i(3)$ & $x_i\cdot\alpha_i(5)$ & $x_i\cdot\alpha_i(7)$ & $x_i\cdot\lambda_i$ \\
+\hline
+26 & 11 & 0 & 0 & 33 & 11 \\
+\hline
+33 & 9 & 45 & 0 & 9 & 0 \\
+\hline
+37 & 33 & 0 & 99 & 33 & 0 \\
+\hline
+39 & 14 & 14 & 14 & 28 & 0 \\
+\hline
+42 & 7 & 21 & 7 & 7 & 7 \\
+\hline
+\hline
+$\Sigma_i$ & 11 & 80 & 120 & 110 & 18 \\
+\hline
+\end{tabular}
+\end{center}
+
+Mamy wtedy resztki szerokości 18.
+
+\section{Zadanie 2}
+\subsection{Model}
+\subsubsection{Zmienne decyzyjne}
+Dla $n$ zadań i horyzontu czasowego $T$ wprowadzamy binarną zmienną $x_{i,j}$, która dla $i\in[n],j\in[T]$ oznacza, że zadanie $i$ rozpoczyna się w momencie $j-1$. $T$ to najpóźniejszy możliwy czas rozpoczęcia zadania, który równa się
+$$\max_{i\in [n]} r_i + \sum_{i\in [n]} p_i + 1$$ 
+gdzie $r_i$ to najwcześniejszy moment rozpoczęcia zadania $i$ a $p_i$ to czas jego trwania. W najgorszym przypadku zadania rozpoczną się z największym opóźnieniem $r$, muszą trwać co najmniej tyle co suma ich wykonywania. Czynnik $+1$ wynika z tego, że $x_{*,t}$ oznacza moment $t-1$.  
+
+
+\subsubsection{Ograniczenia}
+\begin{itemize}
+\item Każde zadanie rozpoczyna się dokładnie raz:
+$$(\forall i \in [n])\left(\sum_{t\in T}x_{j,t}=1\right)$$
+\item $j$-te  zadanie rozpoczyna się nie wcześniej niż w momencie $r_j$
+$$(\forall j \in [n])\left(\sum_{t\in T}(t-1)\cdot x_{j,t}\geq r_j\right)$$
+\item W dowolnym momencie czasu wykonujemy co najwyżej jedno zadanie
+$$(\forall t \in [T])\left(\sum_{j\in n} \left(\sum_{s\in \max(1, t+1-p_j)}^t x_{j,s} \right) \leq 1\right)$$
+\end{itemize}
+
+\subsection{Funkcja celu}
+Niech $w_j$ oznacza wagę $j$-ego zadania. Minimalizujemy ważoną sumę czasów zakończenia zadań
+$$f(\x)=\sum_{j \in [n]}\sum_{t\in[T]} w_j * (t-1+p_j) * x_{j,t}$$
+
+
+\subsection{Wyniki}
+W ramach sprawdzenia implementacji użyłem dwóch zadań o następujących parametrach
+$$p_1=10,\quad p_2=10,\quad  w_1=10000,\quad  p_2=1,\quad  r_1=5,\quad  r_2=0$$
+Model określił, że zadanie pierwsze powinno rozpocząć się w momencie 5 a drugie w momencie 15. Jest to zgodne z oczekiwaniami, że mimo większego ograniczenia $r$ na zadanie pierwsze, zaczynamy od niego, ponieważ ma dużo większą wagę.
+
+
+\section{Zadanie 3}
+\subsection{Model}
+\subsubsection{Zmienne decyzyjne}
+Dla $n$ zadań, $m$ maszyn i horyzontu czasowego $T$ wprowadzamy binarną zmienną $x_{i,j,k}$, która dla $i\in[n],j\in[T],k\in[m]$ oznacza, że zadanie $i$ rozpoczyna się w momencie $j-1$ na maszynie $k$. $T$ to najpóźniejszy możliwy czas rozpoczęcia zadania, który równa się
+$$\sum_{i\in [n]} p_i + 1$$ 
+gdzie $p_i$ to czas trwania zadania $i$. W najgorszym przypadku zadania muszą trwać co najmniej tyle co suma ich wykonywania. Czynnik $+1$ wynika z tego, że $x_{*,t,*}$ oznacza moment $t-1$.  
+
+
+
+\subsubsection{Ograniczenia}
+Wprowadźmy ogólne oznaczenia parametrów:
+\begin{itemize}
+    \item $\varepsilon_{p, c}$ - współczynnik uzyskiwania z ropy $c\in C$  produktu $p\in P_C$ (w treści zadania $P_C=\{benzyna, olej, destylat, resztki\}$) 
+    \item $\chi_{d}$ - współczynnik uzyskiwania produktu $d\in D_P$ w procesie krakowania destylatu (w treści zadania $D_P=\{benzyna, olej, resztki\}$) 
+    \item $\sigma_{c}$ - udział siarki w oleju z ropy $c\in C$
+    \item $\eta_c$     - udział siarki w oleju z krakowania destylatu z ropy $c\in C$
+    
+\end{itemize}
+Ograniczenia właściwe:
+\begin{itemize}
+    \item Suma oleju wyprodukowanego z danego typu ropy musi równać się sumie ton tego oleju wykorzystanych do różnych celów:
+    $$\left(\forall c \in C\right) \left(\varepsilon_{olej, c} \cdot  x_c = \sum_{o \in O_U} y_{o, c}\right)$$
+    
+    \item Suma destylatu wyprodukowanego z danego typu ropy musi równać się sumie ton tego destylatu wykorzystanych do różnych celów:
+    $$\left(\forall c \in C\right) \left( \varepsilon_{destylat, c} \cdot  x_{c} = \sum_{d \in D_U} z_{d, c}\right)$$
+    
+    \item Niech $MIN_{silnikowe}$ oznacza minimalną liczbę ton paliw silnikowych do wyprodukowania. W całości procesu na paliwa silnikowe składa się benzyna ze wszystkich rodzajów ropy i z krakowania:
+    $$\sum_{c \in C} \left(\chi_{benzyna} \cdot  z_{krak, c} + \varepsilon_{benzyna, c} \cdot  x_{c}\right) \geq MIN_{silnikowe}$$
+
+    \item Niech $MIN_{domowe}$ oznacza minimalną liczbę ton domowych paliw olejowych do wyprodukowania. W całości procesu na domowe paliwa olejowe składa się olej z destylacji każdego rodzaju ropy wykorzystany do paliw domowych oraz olej z procesu krakowania destylatu:
+    $$\sum_{c \in C} (\chi_{olej} \cdot  z_{krak, c} + y_{domowe, c}) \geq MIN_{domowe}$$
+
+    \item Niech $MIN_{ciezkie}$ oznacza minimalną liczbę ton ciężkich paliw olejowych do wyprodukowania. W całości procesu na ciężkie paliwa olejowe składa się olej oraz destylat z destylacji każdego rodzaju ropy wykorzystane do paliw ciężkich, resztki z każdego etapu produkcji:
+    $$\sum {c \in C} (y_{ciezkie, c} + z_{ciezkie, c} + \varepsilon_{resztki, c} \cdot  x_{c} + \chi_{resztki} \cdot  z_{krak, c})  \geq MIN_{ciezkie}$$
+
+    \item Niech $MAX_S$ oznacza maksymalny udział siarki w domowych paliwach olejowych. Zatem ten udział przemnożony przez całość domowych paliw olejowych musi być większy lub równy od prawdziwego udziału siarki w poszczególnych produktach składających się na domowe paliwa olejowe, czyli olejach z destylacji ropy oraz olejach z krakowania:
+    $$\sum_{c \in C} (\sigma_{c} \cdot  y_{domowe, c} + (\eta_{c} \cdot  \chi_{olej} \cdot  z_{krak, c})) \leq MAX_S \cdot  \sum_{c \in C} (\chi_{olej} \cdot  z_{krak, c} + y_{domowe, c})$$
+\end{itemize}
+
+\subsection{Funkcja celu}
+Chcemy minimalizować koszt wytworzenia wszystkich paliw. Niech $\gamma_c$ oznacza koszt tony ropy typu $c$, $\delta$ oznacza koszt destylacji tony ropy a $\kappa$ oznacza koszt krakowania tony destylatu. Wtedy całkowity koszt wynosi:
+$$f(\x, \z)=  \sum_{c \in C} ((\gamma_{c} + \delta) \cdot  x_{c} + \kappa \cdot  z_{krak, c})$$
+
+\subsection{Wyniki}
+Optymalnym rozwiązaniem będzie zakup wyłącznie tańszej ropy, czyli ropy typu $B1$. Ostatecznie:
+\begin{itemize}
+    \item Kupujemy 1026030.36876356 ton ropy $B1$
+    \item 381561.822125814 ton oleju z destylacji ropy dodajemy do domowych paliw olejowych
+    \item 28850.3253796095 ton oleju z destylacji ropy dodajemy do ciężkich paliw olejowych
+    \item 92190.8893709328 ton destylatu z destylacji ropy dajemy do krakowania
+    \item 61713.6659436009 ton destylatu z destylacji ropy dajemy do ciężkich paliw olejowych
+\end{itemize}
+Całkowity koszt wynosi 1345943600.86768 \$.
+
+
+\section{Zadanie 4}
+\subsection{Model}
+\subsubsection{Zmienne decyzyjne}
+Podejmujemy decyzje o ćwiczeniach oraz o treningach:
+\begin{itemize}
+    \item Przez $x_{g, c}=1$ oznaczamy, że bierzemy zajęcia z kursu $c\in C$ w grupie $g\in G$. W przeciwnym przypadku $x_{g, c}=0$. W treści zadania $C=\{algebra ,analiza, fizyka, chemia_min ,chemia_org\}$ i $G=\{I,II,III,IV\}$. 
+    \item Przez $y_{p}=1$ oznaczamy, że trenujemy w grupie treningowej $p\in P$. W przeciwnym przypadku $y_p=0$. W treści zadania nie oznaczono tego zbioru, ale można zdefiniować $P_G=\{I,II,II\}$, które oznaczają kolejno treningi w pon 11-13 oraz w środę 11-13 i 13-15. 
+\end{itemize}
+
+\subsubsection{Ograniczenia}
+Wprowadźmy ogólne oznaczenia parametrów:
+\begin{itemize}
+    \item $\sigma_{g,c}$ - oznacza godzinę rozpoczęcia zajęć z kursu $c\in C$ w grupie $g\in G$
+    \item $\varepsilon_{g,c}$ - oznacza godzinę zakończenia zajęć z kursu $c\in C$ w grupie $g\in G$
+    \item $\delta_{g,c}\in [1,2,3,4,5]$ - oznacza dzień zajęć z kursu $c\in C$ w grupie $g\in G$
+
+    \item $\pi_{g,c}$ - oznacza punkty preferencji danych zajęć $c$ w grupie $G$
+    
+
+    \item $\sigma^{PE}_{p}$ - oznacza godzinę rozpoczęcia treningu $p$
+    \item $\varepsilon^{PE}_{p}$ - oznacza godzinę zakończenia treningu $p$
+    \item $\delta^{PE}_{p}\in [1,2,3,4,5]$ - oznacza dzień treningu $p$
+
+    
+\end{itemize}
+Ograniczenia właściwe:
+\begin{itemize}
+    \item Każdego dnia suma trwania wszystkich zajęć jest mniejsza lub równa od czterech godzin:
+    $$\left(\forall d \in [5]\right) \left(\sum_ {g \in G, c \in C : \delta_{g,c} = d} (\varepsilon_{g,c} - \sigma_{g,c}) \cdot x_{g,c} \leq 4\right)$$
+    
+    \item Dla każdego kursu wybieramy dokładnie jedną grupę:
+    $$\left(\forall c \in C\right) \left(\sum_ {g \in G} x_{g,c} = 1\right)$$
+
+    \item Student nie może brać udziału w dwóch różnych ćwiczeniach jednocześnie. Zatem jeśli dla dwóch zajęć danego dnia czas rozpoczęcia jednych z nich zawiera się między czasem rozpoczęcia i czasem zakończenia tych drugich to bierzemy co najwyżej jedne z nich:
+    \small 
+    $$
+    \left(\forall c_1,c_2 \in C\right) 
+    \left(\forall g_1,g_2 \in G\right) 
+    \left(
+    (c_1,g_1) \neq (c_2,g_2) \land 
+    \delta_{g_1,c_1} = \delta_{g_2,c_2} \land 
+    \sigma_{g_2, c_2} \in [ \sigma_{g_1, c_1}, \varepsilon_{g_1, c_1}] 
+    \Rightarrow
+    x_{g_1,c_1} + x_{g_2,c_2} \leq 1 
+    \right)$$
+
+    \item Podobnie ćwiczenia nie mogą zaczynać się w trakcie treningu:
+    \small 
+    $$
+    \left(\forall c \in C\right) 
+    \left(\forall g \in G\right) 
+    \left(\forall p \in P \right) 
+    \left(
+    \delta_{g,c} = \delta^{PE}_{p} \land 
+    \sigma_{g,c} \in [ \sigma^{PE}_{p}, \varepsilon^{PE}_{p}] 
+    \Rightarrow
+    x_{g,c} + y_p \leq 1 
+    \right)$$
+
+    \item Ani trening w trakcie ćwiczeń:
+    \small 
+    $$
+    \left(\forall c \in C\right) 
+    \left(\forall g \in G\right) 
+    \left(\forall p \in P \right) 
+    \left(
+    \delta_{g,c} = \delta^{PE}_{p} \land 
+    \sigma^{PE}_{p} \in [ \sigma_{g,c}, \varepsilon_{g,c}] 
+    \Rightarrow
+    x_{g,c} + y_p \leq 1 
+    \right)$$
+
+    \item Każdego dnia student musi mieć godzinę wolnego czasu między 12:00 i 14:00. Zatem suma czasu spędzonego na treningach i ćwiczeniach w tym okienku musi być mniejszy lub równy od 1:
+    \begin{align*}
+     (\forall d \in [5]) ( 
+&\sum_ {g \in G, c \in C : \delta_{g,c} = d \land \sigma_{g,c} <   12 \land \varepsilon_{g,c} \leq 14} (\varepsilon_{g,c} - 12)                 \cdot x_{g,c} + \\  
+    &\sum_ {g \in G, c \in C : \delta_{g,c} = d \land \sigma_{g,c} \geq  12 \land \varepsilon_{g,c} \leq 14} (\varepsilon_{g,c}  - \sigma_{g,c}) \cdot x_{g,c} + \\
+    &\sum_ {g \in G, c \in C : \delta_{g,c} = d \land \sigma_{g,c} \geq  12 \land \varepsilon_{g,c} >  14} (14 - \sigma_{g,c})               \cdot x_{g,c} +\\
+    &\sum_ {p \in P             : \delta^{PE}{p} = d \land \sigma^{PE}_{p} <   12 \land \varepsilon^{PE}_{p} \leq 14} (\varepsilon^{PE}_{p} - 12)                 \cdot y_{p}   + \\
+    &\sum_ {p \in P             : \delta^{PE}{p} = d \land \sigma^{PE}_{p} \geq  12 \land \varepsilon^{PE}_{p} \leq 14} (\varepsilon^{PE}_{p}  - \sigma^{PE}_{p}) \cdot y_{p}   + \\
+    &\sum_ {p \in P             : \delta^{PE}{p} = d \land \sigma^{PE}_{p} \geq  12 \land \varepsilon^{PE}_{p} >  14} (14 - \sigma^{PE}_{p})               \cdot y_{p}   \leq 1)   
+    \end{align*}
+
+\item Student trenuje co najmniej raz w tygodniu:
+$$\sum_{p \in P} y_{p} \geq 1$$
+
+\end{itemize}
+
+Dodatkowe warunki:
+\begin{itemize}
+    \item Brak zajęć w środy i w piątki:
+    $$\left( \forall g \in G, c \in C \right) (\delta_{g,c} \in \{3,5\} \Rightarrow x_{g,c} = 0)$$
+    \item Brak ćwiczeń o preferencji mniejszej od 5:
+    $$\left( \forall g \in G, c \in C \right) (\pi_{g,c} < 5 \Rightarrow x_{g,c} = 0)$$
+\end{itemize}
+
+\subsection{Funkcja celu}
+
+\subsection{Wyniki}
+
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{Przedział czasu} & \textbf{Zużycie zasobu $r_1$} & \textbf{Wykonywane zadania}\\
+\hline
+(0,50) & 9 & 1 \\
+\hline
+(50,54) & 4 & 4 \\
+\hline
+(54,96) & 15 & 3,4 \\
+\hline
+(96,109) & 28 & 2,3 \\
+\hline
+(109,116) & 17 & 2 \\
+\hline
+(109,143) & 24 & 2,6 \\
+\hline
+(143,144) & 20 & 5,6 \\
+\hline
+(144,159) & 27 & 5,6,7 \\
+\hline
+(159,173) & 20 & 5,6 \\
+\hline
+(173,175) & 13 & 5 \\
+\hline
+(173,237) & 17 & 8 \\
+\hline
+\end{tabular}
+\end{center}
+
+\end{document}

@@ -7,12 +7,17 @@ using Cbc
 n = parse(Int, readline())
 # num of machines
 m = parse(Int, readline())
-# precedor in pair 
-prec = [parse(Int, x) for x in split(readline())]
-# successor in pair
-succ = [parse(Int, x) for x in split(readline())]
-# num of preceding conditions
-l = length(prec)
+# predecessor 
+pred = []
+for i in 1:n
+    push!(pred, [])
+    line = [parse(Int, x) for x in split(readline())]
+    for j in 1:n
+        if line[j] == 1
+            push!(pred[i], j)
+        end
+    end
+end
 # task j takes p[j] time units to complete
 p = [parse(Int, x) for x in split(readline())]
 # time horizon
@@ -29,9 +34,9 @@ model = Model(Cbc.Optimizer)
 # each task is executed exactly once on exactly one machine
 @constraint(model, [j in 1:n], sum(x[j,t,k] for t in 1:T, k in 1:m) == 1)
 # the preceding condition must be satisfied
-@constraint(model, [a in 1:l], 
-    sum((t+p[prec[a]]-1) * x[prec[a],t,k] for t in 1:T - p[prec[a]] + 1, k in 1:m) <= 
-    sum((t-1) * x[succ[a],t,k] for t in 1:T - p[succ[a]] + 1, k in 1:m)
+@constraint(model, [b in 1:n, a in pred[b]], 
+    sum((t+p[a]-1) * x[a,t,k] for t in 1:T - p[a] + 1, k in 1:m) <= 
+    sum((t-1) * x[b,t,k] for t in 1:T - p[b] + 1, k in 1:m)
     )
 # tasks do not overlap on given machine
 @constraint(model, [t in 1:T, k in 1:m], sum(x[j,s,k] for j in 1:n, s in max(1, t+1-p[j]):t) <= 1)

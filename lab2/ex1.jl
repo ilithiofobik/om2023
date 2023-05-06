@@ -1,6 +1,4 @@
 # Wojciech Sęk 
-#import Pkg 
-#Pkg.add("Cbc")
 
 using JuMP
 using Cbc
@@ -50,6 +48,8 @@ all_methods  = generate_possible()
 
 m = length(all_methods)
 
+println("Number of methods = ", m)
+
 model = Model(Cbc.Optimizer)
 
 # x_i - number of standard planks to be cut with i-th method 
@@ -69,7 +69,7 @@ x = value.(x)
 for i in eachindex(x) 
     len = x[i]
     if len > 0
-        println("$(x[i]) times take the partition into:")
+        println("Method $(i): $(x[i]) times take the partition into:")
         for j in eachindex(sizes) 
             println("   $(all_methods[i][j]) of length $(sizes[j])")
         end
